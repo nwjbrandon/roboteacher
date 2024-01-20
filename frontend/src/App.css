@@ -1,38 +1,64 @@
-.App {
+.app-title {
+  margin-top: 32px;
+  margin-bottom: 32px;
+  font-size: 24px;
+  font-weight: bold;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.article-title {
+  display: table;
+  width: 100%;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.article-title-text {
+  font-size: 16px;
+  font-weight: bold;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.article-title-date {
+  font-size: 12px;
 }
 
-.App-link {
-  color: #61dafb;
+.article-content {
+  white-space: pre-line;
+  font-size: 16px;
+  line-height: 24px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 8px;
+  padding-right: 8px;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.article-content-hide {
+  white-space: pre-line;
+  font-size: 16px;
+  line-height: 24px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 8px;
+  padding-right: 8px;
+  text-align: justify;
+  text-justify: inter-word;
+  filter: blur(3px);
+}
+
+.article-audio {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.article-question {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.article-option {
+  margin-top: 8px;
+  margin-bottom: 8px;
 }
