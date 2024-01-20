@@ -3,20 +3,24 @@ import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
 import Grid from '@mui/material/Unstable_Grid2';
 import axios from 'axios';
 import ReactAudioPlayer from 'react-audio-player';
 import BounceLoader from 'react-spinners/BounceLoader';
 import TimeAgo from 'react-timeago';
 import moment from 'moment';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+
 import './App.css';
 
 const BACKEND_URL: string | undefined = process.env.REACT_APP_BACKEND_URL;
 
 type OptionType = {
   option: string;
-  is_answer: boolean;
+  isAnswer: boolean;
 };
 
 type ArticleType = {
@@ -109,9 +113,8 @@ const Article: React.FC<ArticleProps> = ({ articleIdx, article }) => {
             </div>
           </Grid>
         </Grid>
-
         <div className="article-audio">
-          <ReactAudioPlayer src={article.audioObjectKey} controls />
+          <ReactAudioPlayer src={article.audioObjectKey} controls style={{ height: '30px' }} />
         </div>
         <div className="article-question">Qn:&nbsp;{article.question}</div>
       </div>
@@ -122,9 +125,9 @@ const Article: React.FC<ArticleProps> = ({ articleIdx, article }) => {
             variant="outlined"
             onClick={() => setUserAnswer(idx)}
             color={
-              userAnswer === idx && option.is_answer
+              userAnswer === idx && option.isAnswer
                 ? 'success'
-                : userAnswer === idx && !option.is_answer
+                : userAnswer === idx && !option.isAnswer
                 ? 'error'
                 : 'info'
             }
@@ -148,6 +151,7 @@ const LoadingSpinner = () => {
 
 const App = () => {
   const [articles, setArticles] = React.useState<ArticleType[]>([]);
+  const [articleIdx, setArticleIdx] = React.useState<string>('0');
 
   const getReadingPassages = async () => {
     const data = await fetchReadingPassages();
@@ -157,27 +161,94 @@ const App = () => {
     setArticles(data);
   };
 
+  const updateArticle = (event: SelectChangeEvent) => {
+    setArticleIdx(event.target.value);
+  };
+
+  const displayPreviousArticle = () => {
+    const prevIdx = parseInt(articleIdx) - 1;
+    setArticleIdx(prevIdx.toString());
+  };
+
+  const displayNextArticle = () => {
+    const nextIdx = parseInt(articleIdx) + 1;
+    setArticleIdx(nextIdx.toString());
+  };
+
   React.useEffect(() => {
     getReadingPassages();
   }, []);
 
+  const nArticles = articles.length;
   return (
-    <div>
-      <div className="app-title">Reading And Listening Comprehension Practices With ChatGPT</div>
-      <Box sx={{ flexGrow: 1 }}>
-        <Grid direction="column" alignItems="center" justifyContent="center" container spacing={0}>
-          <Grid xs={12} md={8}>
-            {articles.length === 0 ? (
-              <LoadingSpinner />
-            ) : (
-              <Article key={1} articleIdx={1} article={articles[0]} />
-              // articles.map((article, idx) => (
-              //   <Article key={idx} articleIdx={idx + 1} article={article} />
-              // ))
-            )}
+    <div className="app-canvas">
+      <Grid alignItems="center" justifyContent="center" container spacing={0}>
+        <Grid xs={11} md={8}>
+          <div className="app-title">ChatGPT Listening Comprehension</div>
+        </Grid>
+      </Grid>
+      <div className="app-navigation">
+        <Grid alignItems="center" justifyContent="center" container spacing={0}>
+          <Grid xs={11} md={8}>
+            <FormControl fullWidth size="small">
+              <InputLabel id="demo-simple-select-label">Article</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={articleIdx}
+                label="Article Index"
+                onChange={updateArticle}
+              >
+                {articles.map((article, idx) => (
+                  <MenuItem key={idx} value={idx}>
+                    {idx + 1} - {article.title}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
         </Grid>
-      </Box>
+        <Grid alignItems="center" justifyContent="center" container spacing={0}>
+          <Grid xs={11} md={8}>
+            <Grid alignItems="center" justifyContent="center" container spacing={0}>
+              <Grid xs={6}>
+                <Button
+                  disabled={articleIdx === '0'}
+                  size="small"
+                  fullWidth
+                  onClick={displayPreviousArticle}
+                >
+                  Back
+                </Button>
+              </Grid>
+              <Grid xs={6}>
+                <Button
+                  disabled={articleIdx === (nArticles - 1).toString()}
+                  size="small"
+                  fullWidth
+                  onClick={displayNextArticle}
+                >
+                  Next
+                </Button>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grid>
+      </div>
+
+      <Grid direction="column" alignItems="center" justifyContent="center" container spacing={0}>
+        <Grid xs={11} md={8}>
+          {articles.length === 0 ? (
+            <LoadingSpinner />
+          ) : (
+            <Article
+              key={parseInt(articleIdx) + 1}
+              articleIdx={parseInt(articleIdx) + 1}
+              article={articles[parseInt(articleIdx)]}
+            />
+          )}
+        </Grid>
+      </Grid>
     </div>
   );
 };
