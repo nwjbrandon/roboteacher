@@ -70,13 +70,18 @@
 }
 
 .article-question {
-  margin-top: 16px;
-  margin-bottom: 16px;
   font-size: 16px;
   font-weight: bold;
 }
 
 .article-option {
-  margin-top: 8px;
-  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.article-option-success {
+  color: #66bb6a;
+}
+
+.article-option-error {
+  color: #f44336;
 }

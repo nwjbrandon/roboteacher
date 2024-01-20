@@ -13,6 +13,10 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormHelperText from '@mui/material/FormHelperText';
+import FormLabel from '@mui/material/FormLabel';
 
 import './App.css';
 
@@ -70,11 +74,32 @@ interface ArticleProps {
 const Article: React.FC<ArticleProps> = ({ articleIdx, article }) => {
   const [isHidden, setIsHidden] = React.useState<boolean>(true);
   const [userAnswer, setUserAnswer] = React.useState<number>(-1);
+  const [error, setError] = React.useState(false);
+  const [helperText, setHelperText] = React.useState('');
+
   const time = moment.utc(article.createdAt).toDate();
 
   const handleVisibilityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setIsHidden(event.target.checked);
   };
+
+  const updateUserAnswer = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUserAnswer(parseInt(event.target.value));
+    setError(false);
+    setHelperText('');
+  };
+
+  const handleSubmit = () => {
+    if (article.options[userAnswer].isAnswer) {
+      setHelperText('Correct');
+      setError(false);
+    } else {
+      setHelperText('Wrong');
+      setError(true);
+    }
+  };
+
+  const status = userAnswer === -1 || helperText === '' ? 'info' : error ? 'error' : 'success';
 
   return (
     <div>
@@ -114,29 +139,42 @@ const Article: React.FC<ArticleProps> = ({ articleIdx, article }) => {
           </Grid>
         </Grid>
         <div className="article-audio">
-          <ReactAudioPlayer src={article.audioObjectKey} controls style={{ height: '30px' }} />
+          <ReactAudioPlayer src={article.audioObjectKey} controls style={{ height: '40px' }} />
         </div>
         <div className="article-question">Qn:&nbsp;{article.question}</div>
       </div>
-      {article.options.map((option, idx) => (
-        <div key={idx} className="article-option">
-          <Button
-            fullWidth
-            variant="outlined"
-            onClick={() => setUserAnswer(idx)}
-            color={
-              userAnswer === idx && option.isAnswer
-                ? 'success'
-                : userAnswer === idx && !option.isAnswer
-                ? 'error'
-                : 'info'
-            }
-            style={{ textTransform: 'none' }}
+      <Grid container spacing={0}>
+        <FormControl error={error}>
+          <RadioGroup
+            aria-labelledby="demo-error-radios"
+            name="quiz"
+            value={userAnswer}
+            onChange={updateUserAnswer}
+            className="article-option"
           >
-            {idx + 1}:&nbsp;{option.option}
-          </Button>
-        </div>
-      ))}
+            {article.options.map((option, idx) => (
+              <FormControlLabel
+                className={userAnswer === idx ? `article-option-${status}` : ''}
+                key={idx}
+                value={idx}
+                control={<Radio size="small" />}
+                label={option.option}
+              />
+            ))}
+          </RadioGroup>
+        </FormControl>
+      </Grid>
+      <Grid justifyContent="center" container spacing={0}>
+        <Button
+          disabled={userAnswer === -1}
+          color={status}
+          type="submit"
+          variant="contained"
+          onClick={handleSubmit}
+        >
+          Check Answer
+        </Button>
+      </Grid>
     </div>
   );
 };
