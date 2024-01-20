@@ -75,6 +75,9 @@ class Prompt:
         Act as a Japanese to English translator.
         Task:
         A. Translate the article from Japanese to English.
+
+        Note:
+        1. Give your output as \{"translated": "Translated Text"\}
         """
         try:
             completion = self.client.chat.completions.create(
@@ -92,6 +95,8 @@ class Prompt:
             )
 
             output = completion.choices[0].message.content
+            output = json.loads(output, strict=False)
+            output = output["translated"]
             return True, output
         except:
             print("output:", output)
