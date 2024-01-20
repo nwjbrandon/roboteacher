@@ -217,8 +217,9 @@ const App = () => {
                   size="small"
                   fullWidth
                   onClick={displayPreviousArticle}
+                  style={{ textTransform: 'none' }}
                 >
-                  Back
+                  Prev Article
                 </Button>
               </Grid>
               <Grid xs={6}>
@@ -227,8 +228,9 @@ const App = () => {
                   size="small"
                   fullWidth
                   onClick={displayNextArticle}
+                  style={{ textTransform: 'none' }}
                 >
-                  Next
+                  Next Article
                 </Button>
               </Grid>
             </Grid>
