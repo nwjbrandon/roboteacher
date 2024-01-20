@@ -49,7 +49,6 @@ def scrap_data():
             continue
 
         article_collections.insert(article)
-        break
 
     delete_data()
     return {
