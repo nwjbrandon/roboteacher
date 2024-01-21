@@ -4,7 +4,7 @@ resource "aws_lambda_function" "api_lambda_function" {
   role          = aws_iam_role.lambda_iam_role.arn
   image_uri     = "${var.AWS_ACCOUNT_NUMBER}.dkr.ecr.${var.AWS_REGION}.amazonaws.com/${aws_ecr_repository.api_ecr_repository.name}:v0"
   package_type  = "Image"
-  memory_size   = 8192
+  memory_size   = 4096
   timeout       = 300
   environment {
     variables = {
