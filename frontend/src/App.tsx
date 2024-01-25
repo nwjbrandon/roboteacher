@@ -54,7 +54,7 @@ const App = () => {
     <div className="app-canvas">
       <Grid alignItems="center" justifyContent="center" container spacing={0}>
         <Grid xs={11} md={8}>
-          <div className="app-title">Learning Reading And Listening Comprehension With ChatGPT</div>
+          <div className="app-title">Learn Reading And Listening Comprehension With ChatGPT</div>
         </Grid>
       </Grid>
       <div className="app-navigation">
