@@ -49,3 +49,9 @@ yarn start
 
 ## Reference
 - https://www3.nhk.or.jp/news/easy/
+
+## TODO
+- Categorise the difficulty levels
+- Add “Buy me a coffee”
+- Support for other languages
+- Minimize cost from ChatGPT

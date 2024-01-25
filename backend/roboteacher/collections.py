@@ -2,21 +2,17 @@ import random
 
 import pymongo
 from bson.objectid import ObjectId
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
 
-from roboteacher.constants import DB_HOSTNAME, DB_NAME, DB_PASSWORD, DB_USERNAME
+from roboteacher.utils import create_mongodb_connection
 
 
-class ArticleCollections:
+class ReadingComprehensionCollections:
     def __init__(
         self,
     ) -> None:
-        self.db_uri = f"mongodb+srv://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOSTNAME}/?retryWrites=true&w=majority"
-        self.client = MongoClient(self.db_uri, server_api=ServerApi("1"))
-        self.db_name = self.client[DB_NAME]
-        self.articles = self.db_name.Articles
-        self.max_documents = 300
+        self.db_conn = create_mongodb_connection()
+        self.reading_comprehension = self.db_conn.ReadingComprehension
+        self.max_documents = 100
 
     def insert(
         self,
@@ -26,23 +22,23 @@ class ArticleCollections:
         if is_exist:
             return {}
 
-        self.articles.insert_one(data)
+        self.reading_comprehension.insert_one(data)
         return {}
 
     def get(
         self,
     ) -> list:
         res: list = []
-        items = self.articles.find({}).sort(
+        items = self.reading_comprehension.find({}).sort(
             [
-                ("createdAt", pymongo.DESCENDING),
+                ("created_at", pymongo.DESCENDING),
             ]
         )
         for item in items:
             del item["_id"]
-            options = item["options"]
-            random.shuffle(options)
-            item["options"] = options
+            choices = item["choices"]
+            random.shuffle(choices)
+            item["choices"] = choices
 
             res.append(item)
         return res
@@ -52,7 +48,7 @@ class ArticleCollections:
         data: dict,
     ) -> bool:
         url = data["url"]
-        if self.articles.count_documents({"url": url}, limit=1) != 0:
+        if self.reading_comprehension.count_documents({"url": url}, limit=1) != 0:
             return True
         else:
             return False
@@ -60,16 +56,16 @@ class ArticleCollections:
     def delete(
         self,
     ):
-        n_documents = self.articles.count_documents({})
+        n_documents = self.reading_comprehension.count_documents({})
         if n_documents > self.max_documents:
             n_remove = n_documents - self.max_documents
-            items = self.articles.find({}).sort(
+            items = self.reading_comprehension.find({}).sort(
                 [
-                    ("createdAt", pymongo.ASCENDING),
+                    ("created_at", pymongo.ASCENDING),
                 ]
             )
             for i in range(n_remove):
-                self.articles.delete_one(
+                self.reading_comprehension.delete_one(
                     {
                         "_id": ObjectId(items[i]["_id"]),
                     }

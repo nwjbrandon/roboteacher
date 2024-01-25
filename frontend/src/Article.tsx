@@ -33,7 +33,7 @@ export const Article: React.FC<ArticleProps> = ({ articleIdx, article }) => {
   };
 
   const handleSubmit = () => {
-    if (article.options[userAnswer].isAnswer) {
+    if (article.choices[userAnswer].isAnswer) {
       setHelperText('Correct');
       setError(false);
     } else {
@@ -73,11 +73,11 @@ export const Article: React.FC<ArticleProps> = ({ articleIdx, article }) => {
             </Grid>
           </Grid>
           <Grid md={6} xs={12}>
-            <div className="article-content">{article.content.replace(/[\n]+/g, '\n\n')}</div>
+            <div className="article-content">{article.article.replace(/[\n]+/g, '\n\n')}</div>
           </Grid>
           <Grid md={6} xs={12}>
             <div className={isHidden ? 'article-content-hide' : 'article-content'}>
-              {article.translated.replace(/[\n]+/g, '\n\n')}
+              {article.translatedText.replace(/[\n]+/g, '\n\n')}
             </div>
           </Grid>
         </Grid>
@@ -95,13 +95,13 @@ export const Article: React.FC<ArticleProps> = ({ articleIdx, article }) => {
             onChange={updateUserAnswer}
             className="article-option"
           >
-            {article.options.map((option, idx) => (
+            {article.choices.map((choice, idx) => (
               <FormControlLabel
                 className={userAnswer === idx ? `article-option-${status}` : ''}
                 key={idx}
                 value={idx}
                 control={<Radio size="small" />}
-                label={option.option}
+                label={choice.choice}
               />
             ))}
           </RadioGroup>

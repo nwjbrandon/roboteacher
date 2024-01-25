@@ -28,28 +28,28 @@ def create_question_from_article_with_chatgpt(
 
     system_prompt = """
     Note:
-    1. Give your output as only a  RFC8259 compliant JSON response following this format without deviation.
+    1. Give your output as only a RFC8259 compliant JSON response following this format without deviation.
     {
         "question": "the question to be answered",
         "choices": [
             {
                 "choice": "the correct answer to the question",
-                "isAnswer": true,
+                "is_answer": true,
                 "explanation": "the explanation to why the answer is correct"
             },
             {
                 "choice": "the wrong answer to the question",
-                "isAnswer": false,
+                "is_answer": false,
                 "explanation": "the explanation to why the answer is wrong"
             },
             {
                 "choice": "the wrong answer to the question",
-                "isAnswer": false,
+                "is_answer": false,
                 "explanation": "the explanation to why the answer is wrong"
             },
             {
                 "choice": "the wrong answer to the question",
-                "isAnswer": false,
+                "is_answer": false,
                 "explanation": "the explanation to why the answer is wrong"
             }
         ]
@@ -98,10 +98,7 @@ def translate_article_with_chatgpt(
 
     system_prompt = """
     Note:
-    1. Give your output as only a  RFC8259 compliant JSON response following this format without deviation.
-    {
-        "translated": "the translation of the article",
-    }
+    1. Give your output of the translation in plain text without deviation.
     """
 
     client = OpenAI()
@@ -121,8 +118,7 @@ def translate_article_with_chatgpt(
     )
 
     output = completion.choices[0].message.content
-    output = json.loads(output)
-    return output
+    return output.strip()
 
 
 def create_audio_voiceover_from_article_with_chatgpt(

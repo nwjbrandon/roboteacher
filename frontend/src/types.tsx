@@ -1,16 +1,19 @@
 export type OptionType = {
-  option: string;
+  choice: string;
   isAnswer: boolean;
+  explanation: string;
 };
 
 export type ArticleType = {
+  article_id: string;
   url: string;
   title: string;
-  content: string;
-  translated: string;
+  article: string;
+  translatedText: string;
   question: string;
-  options: OptionType[];
+  choices: OptionType[];
   audioObjectKey: string;
+  jsonObjectKey: string;
   createdAt: string;
 };
 
