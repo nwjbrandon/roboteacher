@@ -4,143 +4,87 @@ import traceback
 import boto3
 from openai import OpenAI
 
+from roboteacher.chatgpt import (
+    create_audio_voiceover_from_article_with_chatgpt,
+    create_question_from_article_with_chatgpt,
+    translate_article_with_chatgpt
+)
 from roboteacher.constants import S3_BUCKET_AUDIO
 
 
-class Prompt:
+class ReadingComprehension:
     def __init__(
         self,
     ) -> None:
         self.client = OpenAI()
 
-    def generate(
+    def generate_question(
         self,
-        article: dict,
+        data: dict,
+        language: str,
     ) -> tuple:
-        content = article["content"]
-
-        user_prompt = f"""
-        Create exam question for reading comprehension with the article below.
-
-        {content}
-        """
-
-        system_prompt = """
-        Act as a language teacher who wants to set an exam to test her students' reading comprehension skills.
-        Task:
-        A. Create a question from the article in Japanese.
-        B. Create 4 options for the student to choose from.
-        C. Give the correct answer from the 4 options.
-
-        Note:
-        1. Give only 1 correct option.
-        2. Give your output as \{"question": "Question", "options": [{"option": "Option 1", "isAnswer": true }, {"option": "Option 2", "isAnswer": false }, {"option": "Option 3", "isAnswer": false }, {"option": "Option 4", "isAnswer": false }]\}
-        """
+        article = data["article"]
         try:
-            completion = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": system_prompt,
-                    },
-                    {
-                        "role": "user",
-                        "content": user_prompt,
-                    },
-                ],
+            return True, create_question_from_article_with_chatgpt(
+                article,
+                language,
             )
-
-            output = completion.choices[0].message.content
-            output = json.loads(output)
-            return True, output
         except:
-            print("output:", output)
             print(traceback.format_exc())
             return False, None
 
-    def translate(
+    def translate_passage(
         self,
-        article: dict,
+        data: dict,
+        from_language: str,
+        to_language: str,
     ) -> tuple:
-        content = article["content"]
-
-        user_prompt = f"""
-        Translate the article below into English
-
-        {content}
-        """
-
-        system_prompt = """
-        Act as a Japanese to English translator.
-        Task:
-        A. Translate the article from Japanese to English.
-
-        Note:
-        1. Give your output as \{"translated": "Translated Text"\}
-        """
+        article = data["article"]
         try:
-            completion = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": system_prompt,
-                    },
-                    {
-                        "role": "user",
-                        "content": user_prompt,
-                    },
-                ],
+            return True, translate_article_with_chatgpt(
+                article,
+                from_language,
+                to_language,
             )
-
-            output = completion.choices[0].message.content
-            output = json.loads(output, strict=False)
-            output = output["translated"]
-            return True, output
         except:
-            print("output:", output)
             print(traceback.format_exc())
             return False, None
 
-    def voiceover(
+    def generate_audio(
         self,
-        article: dict,
+        data: dict,
     ) -> bool:
-        article_id = article["articleId"]
-        tmp_audio_fname = f"/tmp/{article_id}.mp3"
-        content = article["content"]
+        tmp_file = f"/tmp/{data['articleId']}.mp3"
+        article = data["article"]
 
         try:
-            response = self.client.audio.speech.create(
-                model="tts-1",
-                voice="nova",
-                input=content,
+            create_audio_voiceover_from_article_with_chatgpt(
+                article,
+                tmp_file,
             )
-            response.stream_to_file(tmp_audio_fname)
             return True
         except:
             print(traceback.format_exc())
             return False
 
-    def save(
+    def save_data_to_s3(
         self,
-        article: dict,
+        data: dict,
     ) -> bool:
-        ret = self.save_article_to_tmp(article)
+        ret = self.save_data_to_tmp(data)
         if not ret:
             return False
 
+        article_id = data["articleId"]
         try:
-            article_id = article["articleId"]
-            self.save_audio_in_s3(article_id)
-            self.save_json_in_s3(article_id)
+            self.upload_audio_file_to_s3(article_id)
+            self.upload_json_file_to_s3(article_id)
             return True
         except:
             print(traceback.format_exc())
             return False
 
-    def save_article_to_tmp(
+    def save_data_to_tmp(
         self,
         article: dict,
     ) -> bool:
@@ -153,24 +97,24 @@ class Prompt:
         except:
             return False
 
-    def save_audio_in_s3(
+    def upload_audio_file_to_s3(
         self,
         article_id: str,
     ) -> str:
-        tmp_audio_fname = f"/tmp/{article_id}.mp3"
-        s3_audio_object_key = f"audio/{article_id}.mp3"
+        tmp_file = f"/tmp/{article_id}.mp3"
+        object_key = f"audio/{article_id}.mp3"
 
         s3 = boto3.resource("s3")
-        s3.Bucket(S3_BUCKET_AUDIO).upload_file(tmp_audio_fname, s3_audio_object_key)
+        s3.Bucket(S3_BUCKET_AUDIO).upload_file(tmp_file, object_key)
         return
 
-    def save_json_in_s3(
+    def upload_json_file_to_s3(
         self,
         article_id: str,
     ) -> str:
-        tmp_json_fname = f"/tmp/{article_id}.json"
-        s3_json_object_key = f"audio/{article_id}.json"
+        tmp_file = f"/tmp/{article_id}.json"
+        object_key = f"audio/{article_id}.json"
 
         s3 = boto3.resource("s3")
-        s3.Bucket(S3_BUCKET_AUDIO).upload_file(tmp_json_fname, s3_json_object_key)
+        s3.Bucket(S3_BUCKET_AUDIO).upload_file(tmp_file, object_key)
         return
