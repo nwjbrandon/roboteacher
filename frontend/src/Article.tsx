@@ -17,8 +17,8 @@ import './App.css';
 export const Article: React.FC<ArticleProps> = ({ articleIdx, article }) => {
   const [isHidden, setIsHidden] = React.useState<boolean>(true);
   const [userAnswer, setUserAnswer] = React.useState<number>(-1);
-  const [error, setError] = React.useState(false);
-  const [helperText, setHelperText] = React.useState('');
+  const [error, setError] = React.useState<boolean>(false);
+  const [status, setStatus] = React.useState<string>('info');
 
   const time = moment.utc(article.createdAt).toDate();
 
@@ -29,20 +29,18 @@ export const Article: React.FC<ArticleProps> = ({ articleIdx, article }) => {
   const updateUserAnswer = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUserAnswer(parseInt(event.target.value));
     setError(false);
-    setHelperText('');
+    setStatus('info');
   };
 
   const handleSubmit = () => {
     if (article.choices[userAnswer].isAnswer) {
-      setHelperText('Correct');
+      setStatus('success');
       setError(false);
     } else {
-      setHelperText('Wrong');
+      setStatus('error');
       setError(true);
     }
   };
-
-  const status = userAnswer === -1 || helperText === '' ? 'info' : error ? 'error' : 'success';
 
   return (
     <div>
@@ -106,11 +104,14 @@ export const Article: React.FC<ArticleProps> = ({ articleIdx, article }) => {
             ))}
           </RadioGroup>
         </FormControl>
+        <div className={`article-explanation article-explanation-${status}`}>
+          {status === 'info' ? '' : 'Explanation: ' + article.choices[userAnswer].explanation}
+        </div>
       </Grid>
+
       <Grid justifyContent="center" container spacing={0}>
         <Button
           disabled={userAnswer === -1}
-          color={status}
           type="submit"
           variant="contained"
           onClick={handleSubmit}

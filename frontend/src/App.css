@@ -1,6 +1,6 @@
 .app-canvas {
   margin-top: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 32px;
 }
 
 .app-title {
@@ -94,5 +94,20 @@
 }
 
 .article-option-error {
+  color: #f44336;
+}
+
+.article-explanation {
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.article-explanation-success {
+  color: #66bb6a;
+}
+
+.article-explanation-error {
   color: #f44336;
 }
