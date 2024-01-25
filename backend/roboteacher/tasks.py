@@ -1,6 +1,6 @@
 from roboteacher.article_collections import ArticleCollections
 from roboteacher.constants import S3_BUCKET_AUDIO
-from roboteacher.prompt import Prompt
+from backend.roboteacher.reading_comprehension import Prompt
 from roboteacher.sample import SAMPLE_DATA
 from roboteacher.scraper import Scrapper
 from roboteacher.utils import create_timestamp
