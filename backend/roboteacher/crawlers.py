@@ -12,6 +12,7 @@ class NHK_Easy_News_Crawler:
         self.recent_news_url = "https://www3.nhk.or.jp/news/easy/news-list.json"
         self.n_days = 3
         self.sleep_in_seconds = 0.2
+        self.language = "jp"
 
     def get(
         self,
@@ -48,6 +49,7 @@ class NHK_Easy_News_Crawler:
                     "article_id": article_id,
                     "url": f"{self.root_url}/{article_id}/{article_id}.html",
                     "title": self.sanitize_text(article_title),
+                    "language": self.language,
                 }
             )
         return res

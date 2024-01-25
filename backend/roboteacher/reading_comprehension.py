@@ -54,7 +54,7 @@ class ReadingComprehension:
         self,
         data: dict,
     ) -> bool:
-        tmp_file = f"/tmp/{data['articleId']}.mp3"
+        tmp_file = f"/tmp/{data['article_id']}.mp3"
         article = data["article"]
 
         try:
@@ -75,7 +75,7 @@ class ReadingComprehension:
         if not ret:
             return False
 
-        article_id = data["articleId"]
+        article_id = data["article_id"]
         try:
             self.upload_audio_file_to_s3(article_id)
             self.upload_json_file_to_s3(article_id)
@@ -89,7 +89,7 @@ class ReadingComprehension:
         article: dict,
     ) -> bool:
         try:
-            article_id = article["articleId"]
+            article_id = article["article_id"]
             tmp_file = f"/tmp/{article_id}.json"
             with open(tmp_file, "w") as f:
                 json.dump(article, f, indent=2)
