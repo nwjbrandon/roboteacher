@@ -2,11 +2,15 @@ import json
 
 from openai import OpenAI
 
+from roboteacher.constants import LANGUAGES_ACRONYMS
+
 
 def create_question_from_article_with_chatgpt(
     article: str,
     language: str,
 ) -> dict:
+    language = LANGUAGES_ACRONYMS[language]
+
     user_prompt = f"""
     Create an exam question for reading comprehension with the article below.
 
@@ -78,6 +82,9 @@ def translate_article_with_chatgpt(
     from_language: str,
     to_language: str,
 ) -> dict:
+    from_language = LANGUAGES_ACRONYMS[from_language]
+    to_language = LANGUAGES_ACRONYMS[to_language]
+
     user_prompt = f"""
     Translate the article below.
 
