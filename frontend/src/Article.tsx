@@ -104,11 +104,12 @@ export const Article: React.FC<ArticleProps> = ({ articleIdx, article }) => {
             ))}
           </RadioGroup>
         </FormControl>
+      </Grid>
+      <Grid container spacing={0}>
         <div className={`article-explanation article-explanation-${status}`}>
           {status === 'info' ? '' : 'Explanation: ' + article.choices[userAnswer].explanation}
         </div>
       </Grid>
-
       <Grid justifyContent="center" container spacing={0}>
         <Button
           disabled={userAnswer === -1}
