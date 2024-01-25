@@ -1,54 +1,57 @@
-from roboteacher.article_collections import ArticleCollections
+import json
+
+import humps
+
+from roboteacher.collections import ReadingComprehensionCollections
 from roboteacher.constants import S3_BUCKET_AUDIO
-from roboteacher.prompt import Prompt
+from roboteacher.crawlers import NHK_Easy_News_Crawler
+from roboteacher.reading_comprehension import ReadingComprehension
 from roboteacher.sample import SAMPLE_DATA
-from roboteacher.scraper import Scrapper
 from roboteacher.utils import create_timestamp
 
 
 def scrap_data():
-    chatgpt = Prompt()
-    scrapper = Scrapper()
-    article_collections = ArticleCollections()
+    chatgpt = ReadingComprehension()
+    scrapper = NHK_Easy_News_Crawler()
+    reading_comprehension_collections = ReadingComprehensionCollections()
 
     articles = scrapper.get()
     print("n_articles:", len(articles))
 
-    for idx, article in enumerate(articles):
-        article_id = article["articleId"]
-        url = article["url"]
-        print(idx, article_id, url)
+    for idx, data in enumerate(articles):
+        article_id = data["article_id"]
+        print(idx, article_id, data["url"])
 
-        is_exists = article_collections.exist(article)
+        is_exists = reading_comprehension_collections.exist(data)
         if is_exists:
             continue
 
-        ret, question = chatgpt.generate(article)
+        ret, question = chatgpt.generate_question(data, "jp")
         if not ret:
             continue
 
-        ret, translated = chatgpt.translate(article)
+        ret, translated_text = chatgpt.translate_passage(data, "jp", "en")
         if not ret:
             continue
 
-        ret = chatgpt.voiceover(article)
+        ret = chatgpt.generate_audio(data)
         if not ret:
             continue
 
-        article = {
-            **article,
+        output = {
+            **data,
             **question,
-            "translated": translated,
-            "audioObjectKey": f"audio/{article_id}.mp3",
-            "jsonObjectKey": f"audio/{article_id}.json",
-            "createdAt": create_timestamp(),
+            "translated_text": translated_text,
+            "audio_object_key": f"audio/{article_id}.mp3",
+            "json_object_key": f"audio/{article_id}.json",
+            "created_at": create_timestamp(),
         }
 
-        ret = chatgpt.save(article)
+        ret = chatgpt.save_data_to_s3(output)
         if not ret:
             continue
 
-        article_collections.insert(article)
+        reading_comprehension_collections.insert(output)
 
     delete_data()
     return {
@@ -63,12 +66,12 @@ def scrap_data():
 
 
 def fetch_data():
-    article_collections = ArticleCollections()
-    articles = article_collections.get()
+    reading_comprehension_collections = ReadingComprehensionCollections()
+    articles = reading_comprehension_collections.get()
     res = []
     for article in articles:
-        audio_filename = article["audioObjectKey"]
-        article["audioObjectKey"] = f"https://{S3_BUCKET_AUDIO}.s3.ap-southeast-1.amazonaws.com/{audio_filename}"
+        audio_filename = article["audio_object_key"]
+        article["audio_object_key"] = f"https://{S3_BUCKET_AUDIO}.s3.ap-southeast-1.amazonaws.com/{audio_filename}"
         res.append(article)
 
     return {
@@ -78,18 +81,25 @@ def fetch_data():
         },
         "body": {
             "message": "Success",
-            "articles": res,
+            "articles": humps.camelize(res),
         },
     }
 
 
 def seed_data():
-    article_collections = ArticleCollections()
+    article_collections = ReadingComprehensionCollections()
     is_exists = article_collections.exist(SAMPLE_DATA)
     if not is_exists:
         article_collections.insert(SAMPLE_DATA)
 
 
 def delete_data():
-    article_collections = ArticleCollections()
+    article_collections = ReadingComprehensionCollections()
     article_collections.delete()
+
+
+def test():
+    print(json.dumps(scrap_data(), indent=2))
+    seed_data()
+    print(json.dumps(fetch_data(), indent=2, ensure_ascii=False))
+    delete_data()

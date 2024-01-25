@@ -17,8 +17,8 @@ import './App.css';
 export const Article: React.FC<ArticleProps> = ({ articleIdx, article }) => {
   const [isHidden, setIsHidden] = React.useState<boolean>(true);
   const [userAnswer, setUserAnswer] = React.useState<number>(-1);
-  const [error, setError] = React.useState(false);
-  const [helperText, setHelperText] = React.useState('');
+  const [error, setError] = React.useState<boolean>(false);
+  const [status, setStatus] = React.useState<string>('info');
 
   const time = moment.utc(article.createdAt).toDate();
 
@@ -29,20 +29,18 @@ export const Article: React.FC<ArticleProps> = ({ articleIdx, article }) => {
   const updateUserAnswer = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUserAnswer(parseInt(event.target.value));
     setError(false);
-    setHelperText('');
+    setStatus('info');
   };
 
   const handleSubmit = () => {
-    if (article.options[userAnswer].isAnswer) {
-      setHelperText('Correct');
+    if (article.choices[userAnswer].isAnswer) {
+      setStatus('success');
       setError(false);
     } else {
-      setHelperText('Wrong');
+      setStatus('error');
       setError(true);
     }
   };
-
-  const status = userAnswer === -1 || helperText === '' ? 'info' : error ? 'error' : 'success';
 
   return (
     <div>
@@ -73,11 +71,11 @@ export const Article: React.FC<ArticleProps> = ({ articleIdx, article }) => {
             </Grid>
           </Grid>
           <Grid md={6} xs={12}>
-            <div className="article-content">{article.content.replace(/[\n]+/g, '\n\n')}</div>
+            <div className="article-content">{article.article.replace(/[\n]+/g, '\n\n')}</div>
           </Grid>
           <Grid md={6} xs={12}>
             <div className={isHidden ? 'article-content-hide' : 'article-content'}>
-              {article.translated.replace(/[\n]+/g, '\n\n')}
+              {article.translatedText.replace(/[\n]+/g, '\n\n')}
             </div>
           </Grid>
         </Grid>
@@ -95,22 +93,25 @@ export const Article: React.FC<ArticleProps> = ({ articleIdx, article }) => {
             onChange={updateUserAnswer}
             className="article-option"
           >
-            {article.options.map((option, idx) => (
+            {article.choices.map((choice, idx) => (
               <FormControlLabel
                 className={userAnswer === idx ? `article-option-${status}` : ''}
                 key={idx}
                 value={idx}
                 control={<Radio size="small" />}
-                label={option.option}
+                label={choice.choice}
               />
             ))}
           </RadioGroup>
         </FormControl>
+        <div className={`article-explanation article-explanation-${status}`}>
+          {status === 'info' ? '' : 'Explanation: ' + article.choices[userAnswer].explanation}
+        </div>
       </Grid>
+
       <Grid justifyContent="center" container spacing={0}>
         <Button
           disabled={userAnswer === -1}
-          color={status}
           type="submit"
           variant="contained"
           onClick={handleSubmit}

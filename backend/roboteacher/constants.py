@@ -10,3 +10,8 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_HOSTNAME = os.getenv("DB_HOSTNAME")
 DB_NAME = os.getenv("DB_NAME")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+LANGUAGES_ACRONYMS = {
+    "jp": "Japanese",
+    "en": "English",
+}

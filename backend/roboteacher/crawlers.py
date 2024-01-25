@@ -4,35 +4,38 @@ import requests
 from bs4 import BeautifulSoup
 
 
-class Scrapper:
+class NHK_Easy_News_Crawler:
     def __init__(
         self,
     ) -> None:
-        self.recent_articles_url = "https://www3.nhk.or.jp/news/easy/news-list.json"
         self.root_url = "https://www3.nhk.or.jp/news/easy"
+        self.recent_news_url = "https://www3.nhk.or.jp/news/easy/news-list.json"
+        self.n_days = 3
+        self.sleep_in_seconds = 0.2
+        self.language = "jp"
 
     def get(
         self,
     ) -> list:
-        articles = self.get_recent_article_urls()
+        articles = self.get_recent_articles()
         res = []
-        for article in articles:
-            ret, content = self.get_article_content(article)
+        for data in articles:
+            ret, article = self.get_article(data)
             if not ret:
                 continue
 
-            article["content"] = content
-            res.append(article)
+            data["article"] = article
+            res.append(data)
         return res
 
-    def get_recent_article_urls(
+    def get_recent_articles(
         self,
     ) -> list:
-        response = requests.get(self.recent_articles_url).json()
+        response = requests.get(self.recent_news_url).json()
         response = response[0] if type(response) == list else response
 
-        # Get earliest articles
-        dates = sorted(list(response.keys()))[-3:]
+        # Get recent articles
+        dates = sorted(list(response.keys()))[-self.n_days :]
         articles = []
         for date in dates:
             articles.extend(response[date])
@@ -43,36 +46,37 @@ class Scrapper:
             article_title = article["title"]
             res.append(
                 {
-                    "articleId": article_id,
+                    "article_id": article_id,
                     "url": f"{self.root_url}/{article_id}/{article_id}.html",
                     "title": self.sanitize_text(article_title),
+                    "language": self.language,
                 }
             )
         return res
 
-    def get_article_content(
+    def get_article(
         self,
-        article: dict,
+        data: dict,
     ) -> str:
         # Prevent 429 errors
-        time.sleep(0.2)
+        time.sleep(self.sleep_in_seconds)
 
-        article_url = article["url"]
-        page = requests.get(article_url)
+        url = data["url"]
+        page = requests.get(url)
         soup = BeautifulSoup(page.content, "html.parser")
 
-        article = soup.find_all("div", class_="article-main__body article-body")
-        article = None if len(article) == 0 else article[0]
-        if article is None:
+        body = soup.find_all("div", class_="article-main__body article-body")
+        body = None if len(body) == 0 else body[0]
+        if body is None:
             return False, None
 
-        paragraphs = article.find_all("p")
+        paragraphs = body.find_all("p")
         text = []
         for paragraph in paragraphs:
             text.append(paragraph.get_text())
-        content = "\n".join(text)
+        article = "\n".join(text)
 
-        return True, self.sanitize_text(content)
+        return True, self.sanitize_text(article)
 
     def sanitize_text(
         self,
